@@ -38,8 +38,10 @@ app.use(flash());
 
 
 const mainRoutes = require('./routes/main');
+const userRoutes = require('./routes/user');
 
 app.use(mainRoutes);
+app.use(userRoutes);
 
 
 app.listen(3000, (err) =>{
