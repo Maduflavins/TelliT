@@ -6,6 +6,7 @@ const Schema  =  mongoose.Schema;
 const UserSchema = new Schema({
     email: { type: String, unique: true, lowercase: true },
     name: String,
+    password: String,
     photo: String,
     tellits: [{
         tell: { type: Schema.Types.ObjectId, ref: 'Tell'}
@@ -36,8 +37,17 @@ UserSchema.methods.gravatar = function(size) {
 
 
 UserSchema.methods.comparePassword = function(password){
-    return bcrypt.compareSync(password, this.password)
+    var user = this;
+    return bcrypt.compareSync(password, user.password)
 }
+
+UserSchema.methods.validPassword = function(userPassword) {
+    if(this.password != null) {
+        return bcrypt.compareSync(userPassword, this.password);
+    } else {
+        return false;
+    }
+};
 
 
 

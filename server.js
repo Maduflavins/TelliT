@@ -7,12 +7,14 @@ expressHbs    =     require('express-handlebars'),
 session       =     require('express-session'),
 MongoStore    =     require('connect-mongo')(session),
 flash         =     require('express-flash'),
+passport      =     require('passport'),
+cookieParser  =     require('cookie-parser'),
 config        =     require('./config/secret');
 
 const app = express();
 
 mongoose.Promise = global.Promise;
-var promise = mongoose.connect(config.database,{useMongoClient: true}, (err) =>{
+var promise = mongoose.connect(config.database,{useMongoClient: true}, function(err){
     if(err){
       console.log(err)
     }else{
@@ -35,6 +37,13 @@ app.use(session({
 }));
 
 app.use(flash());
+app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(function(req, res, next){
+  res.locals.user = req.user;
+  next();
+});
 
 
 const mainRoutes = require('./routes/main');
