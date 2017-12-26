@@ -3,9 +3,20 @@ morgan        =     require('morgan'),
 bodyParser    =     require('body-parser'),
 mongoose      =     require('mongoose'),
 hbs           =     require('hbs'),
-expressHbs    =     require('express-handlebars');
+expressHbs    =     require('express-handlebars'),
+config        =     require('./config/secret');
 
 const app = express();
+
+mongoose.Promise = global.Promise;
+var promise = mongoose.connect(config.database,{useMongoClient: true}, (err) =>{
+    if(err){
+      console.log(err)
+    }else{
+      console.log('connected to new database');
+    }
+  })
+
 
 app.engine('.hbs', expressHbs({ defaultLayout: 'layout', extname: '.hbs' }));
 app.set('view engine', 'hbs');
