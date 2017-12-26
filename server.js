@@ -4,6 +4,9 @@ bodyParser    =     require('body-parser'),
 mongoose      =     require('mongoose'),
 hbs           =     require('hbs'),
 expressHbs    =     require('express-handlebars'),
+session       =     require('express-session'),
+MongoStore    =     require('connect-mongo')(session),
+flash         =     require('express-flash'),
 config        =     require('./config/secret');
 
 const app = express();
@@ -24,6 +27,14 @@ app.use(express.static(__dirname + '/public'));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+    resave: true,
+    saveUninitialized: true,
+    secret: config.secret,
+    store: new MongoStore({ url: config.database, autoReconnect: true})
+}));
+
+app.use(flash());
 
 
 const mainRoutes = require('./routes/main');
