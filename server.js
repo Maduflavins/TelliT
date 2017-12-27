@@ -9,9 +9,10 @@ MongoStore    =     require('connect-mongo')(session),
 flash         =     require('express-flash'),
 passport      =     require('passport'),
 cookieParser  =     require('cookie-parser'),
-config        =     require('./config/secret');
-
-const app = express();
+config        =     require('./config/secret'),
+app           =     express(),
+http          =     require('http').Server(app),
+io            =     require('socket.io')(http);
 
 mongoose.Promise = global.Promise;
 var promise = mongoose.connect(config.database,{useMongoClient: true}, function(err){
@@ -45,6 +46,8 @@ app.use(function(req, res, next){
   next();
 });
 
+require('./realtime/io')(io);
+
 
 const mainRoutes = require('./routes/main');
 const userRoutes = require('./routes/user');
@@ -53,7 +56,7 @@ app.use(mainRoutes);
 app.use(userRoutes);
 
 
-app.listen(3000, (err) =>{
+http.listen(3000, (err) =>{
     if(err) console.log(err);
     console.log('Running on port ${3000}')
 });
