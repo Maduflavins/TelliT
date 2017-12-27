@@ -8,6 +8,7 @@ session       =     require('express-session'),
 MongoStore    =     require('connect-mongo')(session),
 flash         =     require('express-flash'),
 passport      =     require('passport'),
+passportSocketIo =  require('passport.socketio'),
 cookieParser  =     require('cookie-parser'),
 config        =     require('./config/secret'),
 app           =     express(),
@@ -23,6 +24,7 @@ var promise = mongoose.connect(config.database,{useMongoClient: true}, function(
     }
   })
 
+const sessionStore = new MongoStore({ url: config.database, autoReconnect: true});
 
 app.engine('.hbs', expressHbs({ defaultLayout: 'layout', extname: '.hbs' }));
 app.set('view engine', 'hbs');
@@ -34,7 +36,7 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     secret: config.secret,
-    store: new MongoStore({ url: config.database, autoReconnect: true})
+    store: sessionStore
 }));
 
 app.use(flash());
@@ -45,6 +47,25 @@ app.use(function(req, res, next){
   res.locals.user = req.user;
   next();
 });
+
+io.use(passportSocketIo.authorize({
+  cookieParser: cookieParser,
+  key: 'connect.sid',
+  secret: config.secret,
+  store: sessionStore,
+  success: onAuthorizeSuccess,
+  fail: onAuthorizeFail
+}));
+
+function onAuthorizeSuccess(data, accept){
+  console.log('successful connection');
+  accept();
+}
+
+function onAuthorizeFail(data, message, error, accept){
+  console.log("failed connection");
+  if(error) accept(new Error(message));
+}
 
 require('./realtime/io')(io);
 
