@@ -5,13 +5,21 @@
         <img class="photo-size" src="{{ foundUser.photo }} />"
         <br />
         <br />
+        {{#if currentUser}}
+        {{ else}}
+        <input type="hidden" id="user_id" value="{{ foundUser._id }}" />
+        {{#if admirer }}
+        <p><button class="btn btn-primary" id="unadmire">Admiring</button></p>
+        {{ else }}
         <p><button class="btn btn-default" id="admire">Admire</button></p>
+        {{/if}}
+        {{/if}}
     </div>
     
     <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-    <li><a data-toggle="tab" href="#menu1">Admires</a></li>
-    <li><a data-toggle="tab" href="#menu2">Admiring</a></li>
+    <li class="active"><a data-toggle="tab" href="#home">Tells</a></li>
+    <li><a data-toggle="tab" href="#menu1">Admiring</a></li>
+    <li><a data-toggle="tab" href="#menu2">Admirers</a></li>
     </ul>
 
     <div class="tab-content">

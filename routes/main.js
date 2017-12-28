@@ -37,11 +37,93 @@ router.get('/user/:id', (req, res, next) =>{
                 .populate('admiring')
                 .populate('admirers')
                 .exec(function(err, user){
-                    res.render('main/user', { foundUser: user, tells: tells });
+                    var admirer = user.admirers.some(function(friend){
+                        return friend.equals(req.user._id);
+                    })
+
+                    var currentUser;
+                    if(req.user._id.equals(user._id)){
+                        currentUser = false;
+                    }
+                    res.render('main/user', { foundUser: user, tells: tells, currentUser: currentUser, admirer: admirer });
                 })
 
         }
     ])
+});
+
+router.post('/admire/:id', (req, res, next)=>{
+    async.parallel([
+        function(callback){
+            User.update(
+                {
+                    _id: req.user._id,
+                    admiring: { $ne: req.params.id }
+                },
+                {
+                    $push:{ admiring: req.params.id }
+                }, function(err, count){
+                    callback(err, count);
+                }
+            )
+
+        },
+
+        function(callback){
+            User.update(
+                {
+                    _id: req.params.id,
+                    admirers: { $ne: req.user._id }
+                },
+                {
+                    $push:{ admirers: req.params.id }
+                }, function(err, count){
+                    callback(err, count);
+                }
+            )
+
+        }
+    ], function(err, results) {
+        if(err) return next(err);
+        res.json("Success");
+    })
+})
+
+
+router.post('/unadmire/:id', (req, res, next)=>{
+    async.parallel([
+        function(callback){
+            User.update(
+                {
+                    _id: req.user._id
+                    
+                },
+                {
+                    $pull:{ admiring: req.params.id }
+                }, function(err, count){
+                    callback(err, count);
+                }
+            )
+
+        },
+
+        function(callback){
+            User.update(
+                {
+                    _id: req.params.id
+                },
+                {
+                    $pull:{ admirers: req.params.id }
+                }, function(err, count){
+                    callback(err, count);
+                }
+            )
+
+        }
+    ], function(err, results) {
+        if(err) return next(err);
+        res.json("Success");
+    })
 })
 
 
