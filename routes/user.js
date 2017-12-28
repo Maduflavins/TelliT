@@ -17,7 +17,8 @@ router.route('/signup')
                 let user = new User();
                 user.name = req.body.name;
                 user.email = req.body.email;
-                user.photo = user.gravatar();
+                // user.photo = user.gravatar();
+                user.photo    = gravatar.profile_url(user.email, {s: '200'});
                 user.password = req.body.password;
                 user.save(function(err) {
                     req.logIn(user, function(err){
